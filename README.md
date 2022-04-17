@@ -28,7 +28,7 @@ For Linux
 GOOS=linux go build -ldflags "-X main.version=X.X.X" -o s3policy ./cmd/policy/
 ```
 
-Fow Windows
+For Windows
 ```
 GOOS=windows go build -ldflags "-X main.version=X.X.X" -o s3policy ./cmd/policy/
 ```
