@@ -45,17 +45,32 @@ type GetBucketACLCmd struct {
 	Verbose bool `arg:"-v,--verbose" help:"Display extended info"`
 }
 
+type GetBucketCORSCmd struct {
+	commonParams
+}
+
+type PutCORSCmd struct {
+	commonParams
+}
+
+type DeleteCORSCmd struct {
+	commonParams
+}
+
 type args struct {
 	ConfigFile string `arg:"-c, --config" help:"Config INI file" default:"./config.ini"`
 	Profile    string `arg:"-p,required" help:"Profile name"`
 
-	PutPolicy    *PutPolicyCmd    `arg:"subcommand:put-policy" help:"Put a policy"`
-	GetPolicy    *GetPolicyCmd    `arg:"subcommand:get-policy" help:"Display a policy"`
-	DeletePolicy *DeletePolicyCmd `arg:"subcommand:del-policy" help:"Delete a policy"`
-	ListBuckets  *ListBucketsCmd  `arg:"subcommand:list-buckets" help:"List buckets"`
-	CreateBucket *CreateBucketCmd `arg:"subcommand:create-bucket" help:"Create a bucket"`
-	DeleteBucket *DeleteBucketCmd `arg:"subcommand:del-bucket" help:"Delete a bucket"`
-	GetBucketACL *GetBucketACLCmd `arg:"subcommand:get-bucket-acl" help:"Get bucket's ACL"`
+	PutPolicy     *PutPolicyCmd     `arg:"subcommand:put-policy" help:"Put a policy"`
+	GetPolicy     *GetPolicyCmd     `arg:"subcommand:get-policy" help:"Display a policy"`
+	DeletePolicy  *DeletePolicyCmd  `arg:"subcommand:del-policy" help:"Delete a policy"`
+	ListBuckets   *ListBucketsCmd   `arg:"subcommand:list-buckets" help:"List buckets"`
+	CreateBucket  *CreateBucketCmd  `arg:"subcommand:create-bucket" help:"Create a bucket"`
+	DeleteBucket  *DeleteBucketCmd  `arg:"subcommand:del-bucket" help:"Delete a bucket"`
+	GetBucketACL  *GetBucketACLCmd  `arg:"subcommand:get-bucket-acl" help:"Get bucket's ACL"`
+	GetBucketCORS *GetBucketCORSCmd `arg:"subcommand:get-cors" help:"Get bucket's CORS"`
+	PutCORS       *PutCORSCmd       `arg:"subcommand:put-cors" help:"Put bucket's CORS"`
+	DeleteCORS    *DeleteCORSCmd    `arg:"subcommand:del-cors" help:"Delete bucket's CORS"`
 }
 
 func (args) Version() string {
@@ -67,6 +82,7 @@ func main() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("ERROR happend: %s", err)
+			// debug.PrintStack()
 			os.Exit(1)
 		}
 	}()
@@ -101,6 +117,15 @@ func main() {
 
 	case args.GetBucketACL != nil:
 		err = client.GetBucketACL(args.GetBucketACL.Bucket, args.GetBucketACL.Verbose)
+
+	case args.GetBucketCORS != nil:
+		err = client.GetBucketCORS(args.GetBucketCORS.Bucket)
+
+	case args.PutCORS != nil:
+		err = client.PutBucketCORS(args.PutCORS.Bucket)
+
+	case args.DeleteCORS != nil:
+		err = client.DeleteCORS(args.DeleteCORS.Bucket)
 
 	default:
 

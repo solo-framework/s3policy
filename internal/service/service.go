@@ -1,5 +1,7 @@
 package service
 
+// see https://github.com/awsdocs/aws-doc-sdk-examples/
+
 import (
 	"encoding/json"
 	"errors"
@@ -168,5 +170,73 @@ func (s *Service) ListBuckets() error {
 	for _, v := range res.Buckets {
 		fmt.Println(v)
 	}
+	return nil
+}
+
+func (s *Service) GetBucketCORS(bucket string) error {
+	res, err := s.client.GetBucketCors(&s3.GetBucketCorsInput{Bucket: &bucket})
+
+	if err != nil {
+		return fmt.Errorf(err.Error())
+	}
+
+	fmt.Println(res)
+	return nil
+}
+
+func (s *Service) PutBucketCORS(bucket string) error {
+	// func (s *Service) PutBucketCORS(bucket string, corsFile string) error {
+	// corsContent, err := ioutil.ReadFile(corsFile)
+	// if errors.Is(err, os.ErrNotExist) {
+	// 	return fmt.Errorf("CORS file doesn't exist: %v", err)
+	// }
+
+	// var policyInput map[string]interface{}
+	// err = json.Unmarshal(corsContent, &policyInput)
+
+	// if err != nil {
+	// 	return fmt.Errorf("CORS parsing error: %s", err)
+	// }
+
+	rule := s3.CORSRule{
+		AllowedHeaders: aws.StringSlice([]string{"Authorization"}),
+		AllowedOrigins: aws.StringSlice([]string{"*"}),
+		MaxAgeSeconds:  aws.Int64(3000),
+		ExposeHeaders:  aws.StringSlice([]string{""}),
+
+		// Add HTTP methods CORS request
+		AllowedMethods: aws.StringSlice([]string{"GET", "HEAD"}),
+	}
+
+	_, err := s.client.PutBucketCors(&s3.PutBucketCorsInput{
+		Bucket: aws.String(bucket),
+		CORSConfiguration: &s3.CORSConfiguration{
+			CORSRules: []*s3.CORSRule{&rule},
+		},
+	})
+	// (&s3.PutBucketPolicyInput{
+	//     Bucket: aws.String(bucket),
+	//     Policy: aws.String(string(corsContent)),
+	// })
+
+	if err != nil {
+		return fmt.Errorf("unable to set bucket %q CORS, %v", bucket, err)
+	}
+
+	fmt.Printf("Successfully set bucket %q's CORS\n", bucket)
+	return nil
+}
+
+func (s *Service) DeleteCORS(bucket string) error {
+
+	_, err := s.client.DeleteBucketCors(&s3.DeleteBucketCorsInput{
+		Bucket: aws.String(bucket),
+	})
+
+	if err != nil {
+		return fmt.Errorf("unable to delete CORS %q, %v", bucket, err)
+	}
+
+	fmt.Printf("Successfully deleted bucket %q's CORS\n", bucket)
 	return nil
 }
